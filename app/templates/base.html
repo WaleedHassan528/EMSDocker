@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="EMS Pro — Professional Employee Management System"/>
+  <title>{% block title %}EMS Pro{% endblock %} | EMS Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% if not current_user.is_authenticated %}auth-page{% endif %}">
+
+{% if current_user.is_authenticated %}
+<!-- ── Sidebar ───────────────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">⚡</div>
+    <span class="brand-text">EMS Pro</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('dashboard.index') }}"
+       class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+      <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{{ url_for('employees.list_employees') }}"
+       class="nav-item {% if 'employees' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">👥</span><span class="nav-label">Employees</span>
+    </a>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('departments.list_departments') }}"
+       class="nav-item {% if 'departments' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">🏢</span><span class="nav-label">Departments</span>
+    </a>
+    {% endif %}
+    <a href="{{ url_for('attendance.list_attendance') }}"
+       class="nav-item {% if 'attendance' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">📋</span><span class="nav-label">Attendance</span>
+    </a>
+    <a href="{{ url_for('leave.list_leave') }}"
+       class="nav-item {% if 'leave' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">🗓️</span><span class="nav-label">Leave</span>
+    </a>
+    <a href="{{ url_for('payroll.list_payroll') }}"
+       class="nav-item {% if 'payroll' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">💰</span><span class="nav-label">Payroll</span>
+    </a>
+    <a href="{{ url_for('performance.list_performance') }}"
+       class="nav-item {% if 'performance' in request.endpoint %}active{% endif %}">
+      <span class="nav-icon">⭐</span><span class="nav-label">Performance</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+      <div class="user-details">
+        <span class="user-name">{{ current_user.username }}</span>
+        <span class="user-role badge-{{ 'admin' if current_user.is_admin else 'emp' }}">
+          {{ current_user.role | capitalize }}
+        </span>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-btn" title="Logout">⏏</a>
+  </div>
+</aside>
+
+<!-- ── Main wrapper ──────────────────────────────────────────────────────── -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div class="topbar-actions">{% block topbar_actions %}{% endblock %}</div>
+  </header>
+
+  <main class="content">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+              <span>{{ message }}</span>
+              <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

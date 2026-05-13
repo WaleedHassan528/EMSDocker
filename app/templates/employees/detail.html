@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.full_name }}{% endblock %}
+{% block page_title %}Employee Profile{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('employees.list_employees') }}" class="btn btn-ghost btn-sm">← Back</a>
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('employees.edit_employee', emp_id=employee.id) }}" class="btn btn-primary btn-sm">Edit</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="profile-grid">
+  <!-- Profile card -->
+  <div class="card profile-card">
+    <div class="profile-avatar">{{ employee.first_name[0] }}{{ employee.last_name[0] }}</div>
+    <h2 class="profile-name">{{ employee.full_name }}</h2>
+    <p class="profile-position">{{ employee.position or 'No position set' }}</p>
+    <span class="badge {{ badge_class(employee.status) }} profile-badge">{{ employee.status|capitalize }}</span>
+    <div class="profile-meta">
+      <div class="meta-item"><span class="meta-label">Code</span><span class="meta-val"><code>{{ employee.emp_code }}</code></span></div>
+      <div class="meta-item"><span class="meta-label">Dept</span><span class="meta-val">{{ employee.department_name }}</span></div>
+      <div class="meta-item"><span class="meta-label">Email</span><span class="meta-val">{{ employee.email }}</span></div>
+      <div class="meta-item"><span class="meta-label">Phone</span><span class="meta-val">{{ employee.phone or '—' }}</span></div>
+      <div class="meta-item"><span class="meta-label">Hired</span><span class="meta-val">{{ format_date(employee.hire_date) }}</span></div>
+      <div class="meta-item"><span class="meta-label">Salary</span><span class="meta-val fw-600">{{ format_currency(employee.salary) }}</span></div>
+    </div>
+  </div>
+
+  <!-- Quick nav cards -->
+  <div class="profile-links">
+    <a href="{{ url_for('attendance.list_attendance') }}" class="quick-card">
+      <span class="qc-icon">📋</span>
+      <span class="qc-label">Attendance Records</span>
+    </a>
+    <a href="{{ url_for('leave.list_leave') }}" class="quick-card">
+      <span class="qc-icon">🗓️</span>
+      <span class="qc-label">Leave Requests</span>
+    </a>
+    <a href="{{ url_for('payroll.list_payroll') }}" class="quick-card">
+      <span class="qc-icon">💰</span>
+      <span class="qc-label">Payroll History</span>
+    </a>
+    <a href="{{ url_for('performance.list_performance') }}" class="quick-card">
+      <span class="qc-icon">⭐</span>
+      <span class="qc-label">Performance Reviews</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

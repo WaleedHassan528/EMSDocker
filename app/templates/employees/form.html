@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% set is_edit = mode == 'edit' %}
+{% block title %}{{ 'Edit' if is_edit else 'New' }} Employee{% endblock %}
+{% block page_title %}{{ 'Edit Employee' if is_edit else 'Add New Employee' }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('employees.list_employees') }}" class="btn btn-ghost btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <form method="POST" class="emp-form" id="empForm" novalidate>
+    <div class="form-section-title">Personal Information</div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label for="first_name" class="form-label">First Name <span class="req">*</span></label>
+        <input type="text" id="first_name" name="first_name" class="form-input"
+               value="{{ employee.first_name if employee else '' }}" required/>
+      </div>
+      <div class="form-group">
+        <label for="last_name" class="form-label">Last Name <span class="req">*</span></label>
+        <input type="text" id="last_name" name="last_name" class="form-input"
+               value="{{ employee.last_name if employee else '' }}" required/>
+      </div>
+      <div class="form-group">
+        <label for="email" class="form-label">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" class="form-input"
+               value="{{ employee.email if employee else '' }}" required/>
+      </div>
+      <div class="form-group">
+        <label for="phone" class="form-label">Phone</label>
+        <input type="tel" id="phone" name="phone" class="form-input"
+               value="{{ employee.phone if employee else '' }}" placeholder="+1-555-0100"/>
+      </div>
+    </div>
+
+    <div class="form-section-title">Job Details</div>
+    <div class="form-grid-2">
+      {% if not is_edit %}
+      <div class="form-group">
+        <label for="emp_code" class="form-label">Employee Code <span class="muted">(auto if blank)</span></label>
+        <input type="text" id="emp_code" name="emp_code" class="form-input"
+               placeholder="e.g. EMP009" style="text-transform:uppercase"/>
+      </div>
+      {% endif %}
+      <div class="form-group">
+        <label for="position" class="form-label">Position</label>
+        <input type="text" id="position" name="position" class="form-input"
+               value="{{ employee.position if employee else '' }}" placeholder="e.g. Software Engineer"/>
+      </div>
+      <div class="form-group">
+        <label for="department_id" class="form-label">Department</label>
+        <select id="department_id" name="department_id" class="form-select">
+          <option value="">— Select Department —</option>
+          {% for dept in departments %}
+          <option value="{{ dept.id }}"
+            {% if employee and employee.department_id == dept.id %}selected{% endif %}>
+            {{ dept.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="salary" class="form-label">Salary (USD) <span class="req">*</span></label>
+        <input type="number" id="salary" name="salary" class="form-input" min="0" step="0.01"
+               value="{{ employee.salary if employee else '' }}" required/>
+      </div>
+      <div class="form-group">
+        <label for="hire_date" class="form-label">Hire Date</label>
+        <input type="date" id="hire_date" name="hire_date" class="form-input"
+               value="{{ employee.hire_date if employee else '' }}"/>
+      </div>
+      <div class="form-group">
+        <label for="status" class="form-label">Status</label>
+        <select id="status" name="status" class="form-select">
+          <option value="active"     {% if employee and employee.status=='active'     %}selected{% endif %}>Active</option>
+          <option value="inactive"   {% if employee and employee.status=='inactive'   %}selected{% endif %}>Inactive</option>
+          <option value="terminated" {% if employee and employee.status=='terminated' %}selected{% endif %}>Terminated</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('employees.list_employees') }}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary" id="submitBtn">
+        {{ 'Update Employee' if is_edit else 'Create Employee' }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

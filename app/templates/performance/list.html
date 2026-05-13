@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Performance Reviews{% endblock %}
+{% block page_title %}Performance Reviews{% endblock %}
+{% block topbar_actions %}
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('performance.add_review') }}" class="btn btn-primary btn-sm">+ Add Review</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body p0">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Employee</th><th>Reviewer</th><th>Rating</th>
+          <th>Comments</th><th>Date</th>
+          {% if current_user.is_admin %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reviews %}
+        <tr>
+          <td class="fw-500">{{ r.emp_name }}</td>
+          <td class="muted">{{ r.reviewer_name }}</td>
+          <td>
+            <span class="stars" title="{{ r.rating }}/5">
+              {{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}
+            </span>
+            <small class="muted">({{ r.rating }}/5)</small>
+          </td>
+          <td class="truncate-cell muted">{{ r.comments or '—' }}</td>
+          <td>{{ format_date(r.review_date) }}</td>
+          {% if current_user.is_admin %}
+          <td class="actions-cell">
+            <a href="{{ url_for('performance.edit_review', review_id=r.id) }}"
+               class="btn btn-ghost btn-xs" title="Edit">✏️</a>
+            <form method="POST" action="{{ url_for('performance.delete_review', review_id=r.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete this performance review?')">
+              <button class="btn btn-danger btn-xs" title="Delete">🗑</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="tc muted py-lg">No performance reviews found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

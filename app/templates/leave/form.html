@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave{% endblock %}
+{% block page_title %}Apply for Leave{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('leave.list_leave') }}" class="btn btn-ghost btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card form-card-sm">
+  <form method="POST" novalidate>
+    {% if current_user.is_admin %}
+    <div class="form-group">
+      <label for="employee_id" class="form-label">Employee <span class="req">*</span></label>
+      <select id="employee_id" name="employee_id" class="form-select" required>
+        <option value="">— Select Employee —</option>
+        {% for emp in employees %}
+        <option value="{{ emp.id }}">{{ emp.full_name }} ({{ emp.emp_code }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="leave_type" class="form-label">Leave Type <span class="req">*</span></label>
+      <select id="leave_type" name="leave_type" class="form-select" required>
+        <option value="annual">Annual Leave</option>
+        <option value="sick">Sick Leave</option>
+        <option value="maternity">Maternity Leave</option>
+        <option value="unpaid">Unpaid Leave</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label for="start_date" class="form-label">Start Date <span class="req">*</span></label>
+        <input type="date" id="start_date" name="start_date" class="form-input"
+               value="{{ today }}" required/>
+      </div>
+      <div class="form-group">
+        <label for="end_date" class="form-label">End Date <span class="req">*</span></label>
+        <input type="date" id="end_date" name="end_date" class="form-input"
+               value="{{ today }}" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="reason" class="form-label">Reason</label>
+      <textarea id="reason" name="reason" class="form-input form-textarea"
+                placeholder="Brief reason for the leave request…"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('leave.list_leave') }}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">Submit Request</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employees{% endblock %}
+{% block topbar_actions %}
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('employees.new_employee') }}" class="btn btn-primary btn-sm">+ Add Employee</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Search & Filter bar -->
+<div class="toolbar">
+  <form method="GET" class="search-form" id="searchForm">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, email, code…"
+           class="form-input search-input" id="searchInput"/>
+    <select name="status" class="form-select" onchange="this.form.submit()" id="statusFilter">
+      <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
+      <option value="active"     {% if status_filter=='active'     %}selected{% endif %}>Active</option>
+      <option value="inactive"   {% if status_filter=='inactive'   %}selected{% endif %}>Inactive</option>
+      <option value="terminated" {% if status_filter=='terminated' %}selected{% endif %}>Terminated</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+    {% if search_query or status_filter %}
+    <a href="{{ url_for('employees.list_employees') }}" class="btn btn-ghost btn-sm">Clear</a>
+    {% endif %}
+  </form>
+  <span class="result-count">{{ employees|length }} employee(s)</span>
+</div>
+
+<div class="card">
+  <div class="card-body p0">
+    <table class="table table-hover" id="employeeTable">
+      <thead>
+        <tr>
+          <th>Code</th><th>Name</th><th>Department</th>
+          <th>Position</th><th>Salary</th><th>Status</th>
+          {% if current_user.is_admin %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr>
+          <td><code class="emp-code">{{ emp.emp_code }}</code></td>
+          <td>
+            <a href="{{ url_for('employees.detail', emp_id=emp.id) }}" class="emp-link">
+              {{ emp.full_name }}
+            </a>
+            <small class="muted d-block">{{ emp.email }}</small>
+          </td>
+          <td>{{ emp.department_name }}</td>
+          <td>{{ emp.position or '—' }}</td>
+          <td>{{ format_currency(emp.salary) }}</td>
+          <td><span class="badge {{ badge_class(emp.status) }}">{{ emp.status|capitalize }}</span></td>
+          {% if current_user.is_admin %}
+          <td class="actions-cell">
+            <a href="{{ url_for('employees.edit_employee', emp_id=emp.id) }}"
+               class="btn btn-ghost btn-xs" title="Edit">✏️</a>
+            <button class="btn btn-danger btn-xs" title="Terminate"
+                    onclick="confirmDelete({{ emp.id }}, '{{ emp.full_name }}', 'soft')">🗑</button>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="tc muted py-lg">No employees found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Confirm delete modal -->
+<div class="modal-overlay" id="deleteModal" hidden>
+  <div class="modal">
+    <h3 class="modal-title">Confirm Action</h3>
+    <p id="deleteMsg" class="modal-body"></p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <form id="deleteForm" method="POST">
+        <input type="hidden" name="delete_type" id="deleteType" value="soft"/>
+        <button type="submit" class="btn btn-danger">Confirm</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(id, name, type) {
+  document.getElementById('deleteMsg').textContent =
+    type === 'hard'
+      ? `Permanently delete ${name} and all related records? This cannot be undone.`
+      : `Mark ${name} as terminated?`;
+  document.getElementById('deleteType').value = type;
+  document.getElementById('deleteForm').action = `/employees/${id}/delete`;
+  document.getElementById('deleteModal').hidden = false;
+}
+function closeModal() { document.getElementById('deleteModal').hidden = true; }
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Leave Requests{% endblock %}
+{% block page_title %}Leave Requests{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('leave.apply_leave') }}" class="btn btn-primary btn-sm">+ Apply Leave</a>
+{% endblock %}
+
+{% block content %}
+<!-- Status filter tabs -->
+<div class="tab-bar">
+  <a href="{{ url_for('leave.list_leave') }}"
+     class="tab {% if not status_filter %}tab-active{% endif %}">All</a>
+  <a href="{{ url_for('leave.list_leave', status='pending') }}"
+     class="tab {% if status_filter=='pending' %}tab-active{% endif %}">Pending</a>
+  <a href="{{ url_for('leave.list_leave', status='approved') }}"
+     class="tab {% if status_filter=='approved' %}tab-active{% endif %}">Approved</a>
+  <a href="{{ url_for('leave.list_leave', status='rejected') }}"
+     class="tab {% if status_filter=='rejected' %}tab-active{% endif %}">Rejected</a>
+</div>
+
+<div class="card">
+  <div class="card-body p0">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Employee</th><th>Type</th><th>From</th><th>To</th>
+          <th>Days</th><th>Reason</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lv in leaves %}
+        <tr>
+          <td class="fw-500">{{ lv.emp_name }}</td>
+          <td>{{ lv.leave_type|capitalize }}</td>
+          <td>{{ format_date(lv.start_date) }}</td>
+          <td>{{ format_date(lv.end_date) }}</td>
+          <td class="tc">{{ lv.duration }}</td>
+          <td class="muted truncate-cell">{{ lv.reason or '—' }}</td>
+          <td><span class="badge {{ badge_class(lv.status) }}">{{ lv.status|capitalize }}</span></td>
+          <td class="actions-cell">
+            {% if current_user.is_admin and lv.status == 'pending' %}
+            <form method="POST" action="{{ url_for('leave.approve_leave', leave_id=lv.id) }}" style="display:inline">
+              <button class="btn btn-success btn-xs" title="Approve">✓</button>
+            </form>
+            <form method="POST" action="{{ url_for('leave.reject_leave', leave_id=lv.id) }}" style="display:inline">
+              <button class="btn btn-danger btn-xs" title="Reject">✗</button>
+            </form>
+            {% endif %}
+            {% if lv.status != 'approved' %}
+            <form method="POST" action="{{ url_for('leave.delete_leave', leave_id=lv.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete this leave request?')">
+              <button class="btn btn-ghost btn-xs" title="Delete">🗑</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="tc muted py-lg">No leave requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Payslip — {{ payslip.emp_name }}{% endblock %}
+{% block page_title %}Payslip{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('payroll.list_payroll') }}" class="btn btn-ghost btn-sm">← Back</a>
+  <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Print</button>
+{% endblock %}
+
+{% block content %}
+<div class="payslip-full card" id="printArea">
+  <!-- Header -->
+  <div class="payslip-company">
+    <div class="ps-brand">⚡ EMS Pro</div>
+    <div>
+      <h2 class="ps-doc-title">PAYSLIP</h2>
+      <p class="muted">{{ payslip.month_name }} {{ payslip.year }}</p>
+    </div>
+  </div>
+
+  <div class="ps-divider"></div>
+
+  <!-- Employee details -->
+  <div class="ps-emp-grid">
+    <div><span class="ps-field-label">Employee Name</span><span class="ps-field-val fw-600">{{ payslip.emp_name }}</span></div>
+    <div><span class="ps-field-label">Employee Code</span><span class="ps-field-val"><code>{{ payslip.emp_code }}</code></span></div>
+    <div><span class="ps-field-label">Position</span><span class="ps-field-val">{{ payslip.position }}</span></div>
+    <div><span class="ps-field-label">Department</span><span class="ps-field-val">{{ payslip.department }}</span></div>
+    <div><span class="ps-field-label">Pay Period</span><span class="ps-field-val">{{ payslip.month_name }} {{ payslip.year }}</span></div>
+    <div><span class="ps-field-label">Generated On</span><span class="ps-field-val">{{ format_date(payslip.generated_on) }}</span></div>
+  </div>
+
+  <div class="ps-divider"></div>
+
+  <!-- Earnings & Deductions table -->
+  <div class="ps-table-grid">
+    <!-- Earnings -->
+    <div>
+      <h4 class="ps-section-title text-green">Earnings</h4>
+      <table class="table ps-inner-table">
+        <thead><tr><th>Description</th><th class="tr">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Base Salary</td><td class="tr">{{ payslip.fmt_base }}</td></tr>
+          <tr><td>Prorated Pay ({{ payslip.present_days }} days)</td><td class="tr">{{ payslip.fmt_prorated }}</td></tr>
+          <tr><td>Allowances (HRA + Extra)</td><td class="tr text-green">{{ payslip.fmt_allowances }}</td></tr>
+        </tbody>
+        <tfoot>
+          <tr class="fw-600"><td>Total Earnings</td>
+          <td class="tr">{{ format_currency(payslip.prorated_base + payslip.allowances) }}</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <!-- Deductions -->
+    <div>
+      <h4 class="ps-section-title text-red">Deductions</h4>
+      <table class="table ps-inner-table">
+        <thead><tr><th>Description</th><th class="tr">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Income Tax</td><td class="tr text-red">{{ payslip.fmt_tax }}</td></tr>
+          <tr><td>Other Deductions</td><td class="tr text-red">{{ format_currency(payslip.deductions - payslip.tax) }}</td></tr>
+        </tbody>
+        <tfoot>
+          <tr class="fw-600"><td>Total Deductions</td><td class="tr text-red">{{ payslip.fmt_deductions }}</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="ps-divider"></div>
+
+  <!-- Net Pay banner -->
+  <div class="ps-net-banner">
+    <span>Net Pay</span>
+    <span class="ps-net-amount">{{ payslip.fmt_net }}</span>
+  </div>
+
+  <!-- Attendance summary -->
+  <div class="ps-att-summary">
+    <div class="ps-att-item"><span class="muted">Working Days</span><strong>{{ payslip.working_days }}</strong></div>
+    <div class="ps-att-item"><span class="muted">Present Days</span><strong class="text-green">{{ payslip.present_days }}</strong></div>
+    <div class="ps-att-item"><span class="muted">Absent Days</span><strong class="text-red">{{ payslip.absent_days }}</strong></div>
+  </div>
+</div>
+{% endblock %}

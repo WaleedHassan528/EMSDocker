@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Records{% endblock %}
+{% block topbar_actions %}
+  {% if current_user.is_admin %}
+  <a href="{{ url_for('attendance.mark_attendance') }}" class="btn btn-primary btn-sm">+ Mark Attendance</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body p0">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Employee</th><th>Date</th><th>Check In</th>
+          <th>Check Out</th><th>Status</th><th>Notes</th>
+          {% if current_user.is_admin %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr>
+          <td class="fw-500">{{ rec.emp_name }}</td>
+          <td>{{ format_date(rec.date) }}</td>
+          <td>{{ rec.check_in or '—' }}</td>
+          <td>{{ rec.check_out or '—' }}</td>
+          <td><span class="badge {{ badge_class(rec.status) }}">{{ rec.status|replace('_',' ')|capitalize }}</span></td>
+          <td class="muted">{{ rec.notes or '—' }}</td>
+          {% if current_user.is_admin %}
+          <td>
+            <form method="POST" action="{{ url_for('attendance.delete_record', record_id=rec.id) }}"
+                  onsubmit="return confirm('Delete this attendance record?')">
+              <button type="submit" class="btn btn-danger btn-xs">🗑</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="tc muted py-lg">No attendance records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

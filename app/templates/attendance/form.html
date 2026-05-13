@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('attendance.list_attendance') }}" class="btn btn-ghost btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card form-card-sm">
+  <form method="POST" novalidate>
+    <div class="form-group">
+      <label for="employee_id" class="form-label">Employee <span class="req">*</span></label>
+      <select id="employee_id" name="employee_id" class="form-select" required>
+        <option value="">— Select Employee —</option>
+        {% for emp in employees %}
+        <option value="{{ emp.id }}">{{ emp.full_name }} ({{ emp.emp_code }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="date" class="form-label">Date <span class="req">*</span></label>
+      <input type="date" id="date" name="date" class="form-input" value="{{ today }}" required/>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label for="check_in" class="form-label">Check In</label>
+        <input type="time" id="check_in" name="check_in" class="form-input" value="09:00"/>
+      </div>
+      <div class="form-group">
+        <label for="check_out" class="form-label">Check Out</label>
+        <input type="time" id="check_out" name="check_out" class="form-input" value="18:00"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="status" class="form-label">Status <span class="req">*</span></label>
+      <select id="status" name="status" class="form-select" required>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+        <option value="late">Late</option>
+        <option value="half_day">Half Day</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="notes" class="form-label">Notes</label>
+      <textarea id="notes" name="notes" class="form-input form-textarea"
+                placeholder="Optional notes…"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('attendance.list_attendance') }}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">Record Attendance</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

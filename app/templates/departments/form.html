@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set is_edit = mode == 'edit' %}
+{% block title %}{{ 'Edit' if is_edit else 'New' }} Department{% endblock %}
+{% block page_title %}{{ 'Edit Department' if is_edit else 'New Department' }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('departments.list_departments') }}" class="btn btn-ghost btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card form-card-sm">
+  <form method="POST" novalidate>
+    <div class="form-group">
+      <label for="name" class="form-label">Department Name <span class="req">*</span></label>
+      <input type="text" id="name" name="name" class="form-input"
+             value="{{ department.name if department else '' }}"
+             placeholder="e.g. Engineering" required maxlength="100"/>
+    </div>
+    <div class="form-group">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" name="description" class="form-input form-textarea"
+                placeholder="Brief description of the department's function…">{{ department.description if department else '' }}</textarea>
+    </div>
+    <div class="form-actions">
+      <a href="{{ url_for('departments.list_departments') }}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {{ 'Update Department' if is_edit else 'Create Department' }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

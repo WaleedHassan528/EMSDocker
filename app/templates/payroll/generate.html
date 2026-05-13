@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Generate Payslip{% endblock %}
+{% block page_title %}Generate Payslip{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('payroll.list_payroll') }}" class="btn btn-ghost btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="gen-layout">
+  <!-- Generation form -->
+  <div class="form-card">
+    <h3 class="card-title mb-md">Payroll Parameters</h3>
+    <form method="POST" novalidate id="genForm">
+      <div class="form-group">
+        <label for="employee_id" class="form-label">Employee <span class="req">*</span></label>
+        <select id="employee_id" name="employee_id" class="form-select" required>
+          <option value="">— Select Employee —</option>
+          {% for emp in employees %}
+          <option value="{{ emp.id }}"
+            {% if payslip and payslip.employee_id == emp.id %}selected{% endif %}>
+            {{ emp.full_name }} ({{ emp.emp_code }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="month" class="form-label">Month <span class="req">*</span></label>
+          <select id="month" name="month" class="form-select">
+            {% for m in range(1,13) %}
+            <option value="{{ m }}"
+              {% if payslip and payslip.month == m %}selected
+              {% elif not payslip and m == today.month %}selected{% endif %}>
+              {{ month_name(m) }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="year" class="form-label">Year <span class="req">*</span></label>
+          <input type="number" id="year" name="year" class="form-input"
+                 value="{{ payslip.year if payslip else today.year }}"
+                 min="2000" max="2099"/>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="extra_allowances" class="form-label">Extra Allowances ($)</label>
+          <input type="number" id="extra_allowances" name="extra_allowances"
+                 class="form-input" value="0" min="0" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label for="extra_deductions" class="form-label">Extra Deductions ($)</label>
+          <input type="number" id="extra_deductions" name="extra_deductions"
+                 class="form-input" value="0" min="0" step="0.01"/>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">⚙ Generate</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Live payslip preview -->
+  {% if payslip %}
+  <div class="card payslip-preview">
+    <div class="card-header">
+      <h3 class="card-title">Payslip Preview</h3>
+      <a href="{{ url_for('payroll.payslip', payroll_id=payslip.id) }}"
+         class="btn btn-ghost btn-sm" target="_blank">Full View ↗</a>
+    </div>
+    <div class="card-body">
+      <div class="payslip-header">
+        <div>
+          <div class="ps-name">{{ payslip.emp_name }}</div>
+          <div class="ps-sub">{{ payslip.position }} · {{ payslip.department }}</div>
+          <div class="ps-sub muted">{{ payslip.emp_code }}</div>
+        </div>
+        <div class="ps-period">
+          <div class="ps-month">{{ payslip.month_name }}</div>
+          <div class="ps-year">{{ payslip.year }}</div>
+        </div>
+      </div>
+      <div class="ps-rows">
+        <div class="ps-row"><span>Base Salary</span><span>{{ payslip.fmt_base }}</span></div>
+        <div class="ps-row muted"><span>Prorated ({{ payslip.present_days }}/{{ payslip.working_days }} days)</span><span>{{ payslip.fmt_prorated }}</span></div>
+        <div class="ps-row text-green"><span>Allowances (HRA + extra)</span><span>+{{ payslip.fmt_allowances }}</span></div>
+        <div class="ps-row text-amber"><span>Tax</span><span>-{{ payslip.fmt_tax }}</span></div>
+        <div class="ps-row text-red"><span>Total Deductions</span><span>-{{ payslip.fmt_deductions }}</span></div>
+        <div class="ps-row ps-total"><span>Net Pay</span><span>{{ payslip.fmt_net }}</span></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
